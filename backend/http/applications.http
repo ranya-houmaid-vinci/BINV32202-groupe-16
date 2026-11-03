@@ -1,0 +1,22 @@
+### Connexion de démo : étudiant Lucas
+# @name student
+POST http://localhost:3000/auth/demo-login
+Content-Type: application/json
+
+{ "kind": "STUDENT", "id": 1 }
+
+### Mes candidatures
+GET http://localhost:3000/applications
+Authorization: {{student.response.body.token}}
+
+### Candidater à une offre publiée
+# @name application
+POST http://localhost:3000/applications
+Authorization: {{student.response.body.token}}
+Content-Type: application/json
+
+{ "offerId": 5, "message": "Le sujet m'intéresse." }
+
+### Retirer une candidature
+DELETE http://localhost:3000/applications/{{application.response.body.id}}
+Authorization: {{student.response.body.token}}

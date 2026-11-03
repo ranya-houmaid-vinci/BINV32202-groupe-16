@@ -32,6 +32,18 @@ export const createOffersRepository = (db: Db) => {
       AND (@period IS NULL OR p.code = @period)
     ORDER BY ay.start_date DESC, o.created_at DESC
   `);
+  const findById = db.prepare<{ id: number }, OfferDbo>(`
+    SELECT o.id, o.title, o.description, o.status,
+           o.company_id, c.short_name AS company_short_name,
+           o.depositor_contact_id,
+           ay.label AS academic_year_label, p.code AS period_code,
+           o.created_at, o.updated_at
+    FROM offers o
+    JOIN companies c ON c.id = o.company_id
+    JOIN academic_years ay ON ay.id = o.academic_year_id
+    JOIN periods p ON p.id = o.period_id
+    WHERE o.id = @id
+  `);
 
   return {
     /** Offres correspondant au filtre, de la plus récente année à la plus ancienne. */
@@ -41,6 +53,7 @@ export const createOffersRepository = (db: Db) => {
         depositorContactId: depositorContactId ?? null,
         period: period ?? null,
       }),
+    findById: (id: number): OfferDbo | undefined => findById.get({ id }),
   };
 };
 
