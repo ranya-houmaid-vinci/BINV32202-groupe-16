@@ -4,6 +4,8 @@ import ErrorState from "../components/ErrorState.tsx";
 import LoadingState from "../components/LoadingState.tsx";
 import OfferTable from "../components/OfferTable.tsx";
 import { useOffers } from "../hooks/useOffers.ts";
+import { useApplications } from "../hooks/useApplications.ts";
+import { createApplication } from "../services/applications.service.ts";
 import { PERIOD_CODES, type PeriodCode } from "../models/offer.ts";
 import type { User } from "../models/user.ts";
 
@@ -33,6 +35,18 @@ const OffersPage = ({ user, token, onUnauthorized }: OffersPageProps) => {
     onUnauthorized,
     period === "" ? undefined : period,
   );
+  const isStudent = user.kind === "STUDENT";
+  const applications = useApplications(token, onUnauthorized, isStudent);
+  const appliedOfferIds = new Set(
+    applications.applications
+      .filter((application) => application.status !== "WITHDRAWN")
+      .map((application) => application.offer.id),
+  );
+
+  const apply = async (offerId: number, message: string) => {
+    await createApplication(token, offerId, message);
+    await applications.reload();
+  };
 
   const renderContent = () => {
     if (error) return <ErrorState message={error} />;
@@ -43,7 +57,12 @@ const OffersPage = ({ user, token, onUnauthorized }: OffersPageProps) => {
         <p className="result-count">
           {offers.length} offre{offers.length > 1 ? "s" : ""}
         </p>
-        <OfferTable offers={offers} />
+        <OfferTable
+          offers={offers}
+          canApply={isStudent}
+          appliedOfferIds={appliedOfferIds}
+          onApply={isStudent ? apply : undefined}
+        />
       </>
     );
   };
