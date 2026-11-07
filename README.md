@@ -93,6 +93,9 @@ Les outils ont été choisis pour rester simples et lisibles :
   - l'étudiant voit les offres publiées ;
   - le déposant voit les offres qu'il a déposées ;
   - un contact sans rôle de déposant n'y a pas accès (403).
+- **Candidatures** : un étudiant peut candidater à une offre publiée avec un message
+  facultatif, retirer une candidature en cours et consulter l'historique de ses
+  candidatures via `GET /applications`.
 - Schéma complet de la base : entreprises, contacts et rôles, étudiants, administrateurs,
   années et périodes, offres, candidatures et stages.
 - Identification et contrôle des droits côté serveur, tests automatisés.
@@ -105,7 +108,6 @@ l'interface :
 - création d'une offre par un déposant, modification ou retrait ;
 - recherche et filtrage des offres (année, période, statut…) ;
 - validation, mise en attente, publication ou archivage d'une offre par un administrateur ;
-- candidature d'un étudiant et retrait d'une candidature ;
 - sélection d'un candidat et création du stage ;
 - déclaration d'un stage par un étudiant et validation par un administrateur ;
 - gestion des entreprises, des contacts et de leurs rôles, détection et fusion des doublons ;

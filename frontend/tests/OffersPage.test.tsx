@@ -95,4 +95,54 @@ describe("OffersPage", () => {
     fireEvent.change(screen.getByLabelText("Période"), { target: { value: "" } });
     await waitFor(() => expect(fetchMock).toHaveBeenLastCalledWith("/api/offers", expect.anything()));
   });
+
+  it("permet à un étudiant de candidater depuis la liste", async () => {
+    const fetchMock = stubFetch({
+      "/api/offers": () =>
+        Response.json([
+          {
+            id: 1,
+            title: "Offre publiée",
+            companyShortName: "Orbis",
+            academicYear: "2026-2027",
+            period: "P2",
+            status: "PUBLISHED",
+          },
+        ]),
+      "/api/applications": (init) =>
+        init?.method === "POST"
+          ? Response.json({
+              id: 9,
+              offer: {
+                id: 1,
+                title: "Offre publiée",
+                companyShortName: "Orbis",
+                academicYear: "2026-2027",
+                period: "P2",
+              },
+              message: "Je suis motivé",
+              status: "IN_PROGRESS",
+              appliedAt: "2026-11-03 12:00:00",
+            })
+          : Response.json([]),
+    });
+
+    render(<OffersPage user={studentUser} token="jeton" onUnauthorized={vi.fn()} />);
+    await screen.findByText("Offre publiée");
+    fireEvent.click(screen.getByRole("button", { name: "Candidater" }));
+    fireEvent.change(screen.getByLabelText("Message (facultatif)"), {
+      target: { value: "  Je suis motivé  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Envoyer" }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/applications",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({ offerId: 1, message: "  Je suis motivé  " }),
+        }),
+      ),
+    );
+  });
 });
