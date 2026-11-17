@@ -96,6 +96,36 @@ describe("OffersPage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenLastCalledWith("/api/offers", expect.anything()));
   });
 
+  it("recherche dans les titres en ignorant les espaces et la casse", async () => {
+    const fetchMock = stubFetch({ "/api/offers": () => Response.json(offers) });
+
+    render(<OffersPage user={contactUser} token="jeton" onUnauthorized={vi.fn()} />);
+    await screen.findByText("Refonte du portail client");
+
+    fireEvent.change(screen.getByLabelText("Recherche par titre"), {
+      target: { value: "  PORTAIL CLIENT  " },
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        "/api/offers?q=PORTAIL+CLIENT",
+        expect.objectContaining({ headers: { Authorization: "jeton" } }),
+      ),
+    );
+  });
+
+  it("affiche un message adapté lorsqu'aucune offre ne correspond à la recherche", async () => {
+    stubFetch({ "/api/offers": () => Response.json([]) });
+
+    render(<OffersPage user={contactUser} token="jeton" onUnauthorized={vi.fn()} />);
+    await screen.findByLabelText("Recherche par titre");
+    fireEvent.change(screen.getByLabelText("Recherche par titre"), {
+      target: { value: "titre inexistant" },
+    });
+
+    await screen.findByText("Aucune offre ne correspond à votre recherche.");
+  });
+
   it("permet à un étudiant de candidater depuis la liste", async () => {
     const fetchMock = stubFetch({
       "/api/offers": () =>

@@ -19,12 +19,22 @@ const parsePeriod = (value: unknown): PeriodCode | undefined => {
   return value as PeriodCode;
 };
 
+const parseTitleKeyword = (value: unknown): string | undefined => {
+  if (value === undefined) return undefined;
+  if (typeof value !== "string") {
+    throw new HttpError(400, "INVALID_QUERY", "Le paramètre q doit être une chaîne de caractères");
+  }
+  const keyword = value.trim();
+  return keyword === "" ? undefined : keyword;
+};
+
 export const createOffersRouter = (offersService: OffersService) => {
   const router = Router();
 
   router.get("/", authorize(canListOffers), (req, res) => {
     const period = parsePeriod(req.query.period);
-    res.json(offersService.listOffers(getCurrentUser(req), period).map(toOfferDto));
+    const titleKeyword = parseTitleKeyword(req.query.q);
+    res.json(offersService.listOffers(getCurrentUser(req), period, titleKeyword).map(toOfferDto));
   });
 
   return router;
