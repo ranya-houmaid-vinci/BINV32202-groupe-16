@@ -30,10 +30,12 @@ const PERIOD_OPTIONS: { value: PeriodCode | ""; label: string }[] = [
 
 const OffersPage = ({ user, token, onUnauthorized }: OffersPageProps) => {
   const [period, setPeriod] = useState<PeriodCode | "">("");
+  const [titleKeyword, setTitleKeyword] = useState("");
   const { offers, isLoading, error } = useOffers(
     token,
     onUnauthorized,
     period === "" ? undefined : period,
+    titleKeyword,
   );
   const isStudent = user.kind === "STUDENT";
   const applications = useApplications(token, onUnauthorized, isStudent);
@@ -51,7 +53,17 @@ const OffersPage = ({ user, token, onUnauthorized }: OffersPageProps) => {
   const renderContent = () => {
     if (error) return <ErrorState message={error} />;
     if (isLoading) return <LoadingState />;
-    if (offers.length === 0) return <EmptyState message="Aucune offre à afficher." />;
+    if (offers.length === 0) {
+      return (
+        <EmptyState
+          message={
+            titleKeyword.trim() === ""
+              ? "Aucune offre à afficher."
+              : "Aucune offre ne correspond à votre recherche."
+          }
+        />
+      );
+    }
     return (
       <>
         <p className="result-count">
@@ -71,6 +83,13 @@ const OffersPage = ({ user, token, onUnauthorized }: OffersPageProps) => {
     <section>
       <h1>Offres de stage</h1>
       <p>{DESCRIPTIONS[user.kind]}</p>
+      <label htmlFor="offer-title-search">Recherche par titre</label>
+      <input
+        id="offer-title-search"
+        type="search"
+        value={titleKeyword}
+        onChange={(event) => setTitleKeyword(event.target.value)}
+      />
       <label htmlFor="offer-period">Période</label>
       <select
         id="offer-period"

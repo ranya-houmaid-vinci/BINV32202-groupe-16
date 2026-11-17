@@ -29,3 +29,9 @@
 - API routes are documented in [backend/API.md](../backend/API.md), REST Client examples are in `backend/http/`, and the broader layer map and testing patterns are in [docs/architecture.md](../docs/architecture.md).
 - Keep API, frontend behavior, tests, `backend/API.md`, and relevant `backend/http/*.http` examples aligned when adding or changing a route. Follow the existing paired backend/API-test and frontend/service-hook-page-test patterns.
 - For a schema evolution, update the migration and its migration/constraint tests; do not modify the existing seed IDs used by tests unless the fixture contract itself changes.
+
+Pour tout ajout de fonctionnalité ou correction de bug, lis et applique
+.github/skills/test-driven-development/SKILL.md avant de modifier le code
+de l’application. Écris et exécute les tests d’abord, présente-les, puis attends
+leur validation explicite avant l’implémentation. Cette règle ne concerne pas les
+demandes d’explication ou de documentation seules.

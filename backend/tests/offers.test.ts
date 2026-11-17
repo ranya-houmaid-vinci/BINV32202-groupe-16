@@ -139,3 +139,38 @@ describe("GET /offers : filtre par période", () => {
     expect(response.body.error.code).toBe("INVALID_QUERY");
   });
 });
+
+describe("GET /offers : recherche par titre", () => {
+  it("ignore les espaces autour du terme et la casse", async () => {
+    const response = await request(app)
+      .get("/offers")
+      .query({ q: "  MODULE DE RAPPORTS pdf  " })
+      .set("Authorization", tokenFor("ADMIN", ADMINISTRATOR.ANNE_LECLERCQ));
+
+    expect(response.status).toBe(200);
+    expect(offerIds(response.body)).toEqual([OFFER.PDF_REPORTS]);
+  });
+
+  it("combine la recherche par titre avec le filtre par période et la visibilité étudiante", async () => {
+    const response = await request(app)
+      .get("/offers")
+      .query({ q: "api rest", period: "P2" })
+      .set("Authorization", tokenFor("STUDENT", STUDENT.LUCAS_DUPONT));
+
+    expect(response.status).toBe(200);
+    expect(offerIds(response.body)).toEqual([OFFER.BILLING_API]);
+    expect(response.body.every((offer: { status: string; period: string }) =>
+      offer.status === "PUBLISHED" && offer.period === "P2",
+    )).toBe(true);
+  });
+
+  it("retourne une liste vide quand aucun titre ne correspond", async () => {
+    const response = await request(app)
+      .get("/offers")
+      .query({ q: "titre inexistant" })
+      .set("Authorization", tokenFor("ADMIN", ADMINISTRATOR.ANNE_LECLERCQ));
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+});
