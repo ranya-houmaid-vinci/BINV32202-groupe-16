@@ -21,6 +21,7 @@
     "check": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "concurrently": "^10.0.6"
   }
 }
